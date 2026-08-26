@@ -1,0 +1,16 @@
+    [package]
+    name = "fanwaave-sync"
+    version = "0.1.0"
+    edition = "2021"
+    license = "MIT"
+    description = "opto-sync wrapper for Fanwaave"
+    repository = "https://github.com/fanwaave/fanwaave-sync"
+
+    [dependencies]
+    serde = { version = "1", features = ["derive"] }
+    thiserror = "2"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+
