@@ -18,5 +18,5 @@ temp/worktrees
 # machine-local symlink to ORESoftware/my-ai AGENTS.md; never committed
 .ores/
 
-# build output (DEN-3945 conformance): never tracked
+# Reviewed fleet conformance rules (DEN-3945).
 target/
