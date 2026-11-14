@@ -61,7 +61,10 @@ mod tests {
         let sync = boundary(true);
         let payload = vec![0_u8; MAX_SYNC_BYTES];
         assert_eq!(sync.envelope(&payload).unwrap(), MAX_SYNC_BYTES);
-        assert_eq!(sync.envelopes([payload.as_slice()]).unwrap(), MAX_SYNC_BYTES);
+        assert_eq!(
+            sync.envelopes([payload.as_slice()]).unwrap(),
+            MAX_SYNC_BYTES
+        );
         assert_eq!(sync.envelopes(std::iter::empty()).unwrap(), 0);
     }
 
@@ -69,7 +72,10 @@ mod tests {
     fn rejects_oversized_envelopes_and_aggregate_batches() {
         let sync = boundary(true);
         let oversized = vec![0_u8; MAX_SYNC_BYTES + 1];
-        assert!(matches!(sync.envelope(&oversized), Err(SyncError::TooLarge)));
+        assert!(matches!(
+            sync.envelope(&oversized),
+            Err(SyncError::TooLarge)
+        ));
         assert!(matches!(
             sync.envelopes([oversized.as_slice()]),
             Err(SyncError::TooLarge)
