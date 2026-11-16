@@ -6,6 +6,11 @@ use crate::sqlite::SqliteStore;
 /// Maximum bytes admitted by one sync operation, including all batch members.
 pub const MAX_SYNC_BYTES: usize = 64 * 1024;
 
+/// A byte budget alone cannot bound a stream of zero-byte envelopes.
+/// Keep the item budget as large as the byte budget, so all previously
+/// admissible batches of nonempty payloads retain their full capacity.
+pub const MAX_SYNC_ENVELOPES: usize = MAX_SYNC_BYTES;
+
 #[derive(Clone, Debug)]
 pub struct SyncBoundary {
     pub store: SqliteStore,
@@ -35,13 +40,21 @@ impl SyncBoundary {
         if !self.enabled {
             return Err(SyncError::Disabled);
         }
-        payloads.into_iter().try_fold(0_usize, |total, bytes| {
-            let len = self.envelope(bytes)?;
-            total
-                .checked_add(len)
-                .filter(|&sum| sum <= MAX_SYNC_BYTES)
-                .ok_or(SyncError::TooLarge)
-        })
+        payloads
+            .into_iter()
+            .try_fold((0_usize, 0_usize), |(total, count), bytes| {
+                let next_count = count
+                    .checked_add(1)
+                    .filter(|&items| items <= MAX_SYNC_ENVELOPES)
+                    .ok_or(SyncError::TooLarge)?;
+                let len = self.envelope(bytes)?;
+                let next_total = total
+                    .checked_add(len)
+                    .filter(|&sum| sum <= MAX_SYNC_BYTES)
+                    .ok_or(SyncError::TooLarge)?;
+                Ok((next_total, next_count))
+            })
+            .map(|(total, _)| total)
     }
 }
 
