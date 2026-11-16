@@ -9,4 +9,3 @@ pub enum SyncError {
     #[error("payload exceeded bound")]
     TooLarge,
 }
-

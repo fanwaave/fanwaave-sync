@@ -6,4 +6,3 @@ pub mod sqlite;
 
 pub use boundary::SyncBoundary;
 pub use error::SyncError;
-
