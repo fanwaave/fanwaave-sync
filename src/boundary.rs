@@ -112,12 +112,12 @@ mod tests {
         let sync = boundary(true);
         let empty: &[u8] = &[];
         assert_eq!(
-            sync.envelopes(std::iter::repeat(empty).take(MAX_SYNC_ENVELOPES))
+            sync.envelopes(std::iter::repeat_n(empty, MAX_SYNC_ENVELOPES))
                 .unwrap(),
             0
         );
         assert!(matches!(
-            sync.envelopes(std::iter::repeat(empty).take(MAX_SYNC_ENVELOPES + 1)),
+            sync.envelopes(std::iter::repeat_n(empty, MAX_SYNC_ENVELOPES + 1)),
             Err(SyncError::TooLarge)
         ));
 
@@ -125,7 +125,7 @@ mod tests {
         // 64 KiB byte slots, so the new limit does not reject valid batches.
         let one = [1_u8];
         assert_eq!(
-            sync.envelopes(std::iter::repeat(one.as_slice()).take(MAX_SYNC_ENVELOPES))
+            sync.envelopes(std::iter::repeat_n(one.as_slice(), MAX_SYNC_ENVELOPES))
                 .unwrap(),
             MAX_SYNC_BYTES
         );
