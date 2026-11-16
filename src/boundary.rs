@@ -108,6 +108,30 @@ mod tests {
     }
 
     #[test]
+    fn empty_envelope_stream_is_bounded_without_reducing_byte_budget() {
+        let sync = boundary(true);
+        let empty: &[u8] = &[];
+        assert_eq!(
+            sync.envelopes(std::iter::repeat(empty).take(MAX_SYNC_ENVELOPES))
+                .unwrap(),
+            0
+        );
+        assert!(matches!(
+            sync.envelopes(std::iter::repeat(empty).take(MAX_SYNC_ENVELOPES + 1)),
+            Err(SyncError::TooLarge)
+        ));
+
+        // Every nonempty envelope consumes at least one of the existing
+        // 64 KiB byte slots, so the new limit does not reject valid batches.
+        let one = [1_u8];
+        assert_eq!(
+            sync.envelopes(std::iter::repeat(one.as_slice()).take(MAX_SYNC_ENVELOPES))
+                .unwrap(),
+            MAX_SYNC_BYTES
+        );
+    }
+
+    #[test]
     fn disabled_sync_rejects_even_empty_batches() {
         let sync = boundary(false);
         assert!(matches!(sync.envelope(&[]), Err(SyncError::Disabled)));
